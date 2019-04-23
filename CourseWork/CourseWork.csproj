@@ -49,5 +49,11 @@
   <ItemGroup>
     <None Include="App.config" />
   </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\AlphaMiner\AlphaMiner.csproj">
+      <Project>{19091f6c-907d-44dc-9918-179de78c5d1d}</Project>
+      <Name>AlphaMiner</Name>
+    </ProjectReference>
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
