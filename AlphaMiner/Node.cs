@@ -22,6 +22,16 @@ namespace AlphaMiner
 
         public static bool operator ==(Node first, Node second)
         {
+            if (first.InputTasks == null && second.InputTasks == null)
+                if (first.OutputTasks.Except(second.OutputTasks).Count() == 0)
+                    return true;
+            if (first.OutputTasks == null && second.OutputTasks == null)
+                if (first.InputTasks.Except(second.InputTasks).Count() == 0)
+                    return true;
+            if (first.OutputTasks == null || second.OutputTasks == null)
+                return false;
+            if (first.InputTasks == null || second.InputTasks == null)
+                return false;
             if (first.InputTasks.Except(second.InputTasks).Count() == 0 && first.OutputTasks.Except(second.OutputTasks).Count() == 0)
                 return true;
             else

@@ -3,29 +3,35 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-//using EventLogConnector;
+using EventLogConnector;
 
 
 namespace AlphaMiner
 {
     public class Alpha
     {
+        /// <summary>
+        /// Конструктор алгоритма, инициализирует ссылку на обрабатываемый лог и на
+        /// каталог для сохранения графа в формате .DOT
+        /// </summary>
+        /// <param name="pathOfLog">Ссылка на лог</param>
+        /// <param name="pathOfWrite">Ссылка на каталог для сохранения файла</param>
         public Alpha(string pathOfLog, string pathOfWrite)
         {
             PathOfLog = pathOfLog;
-            PathOfWrite = pathOfWrite;
-            FirstTasks = new List<string>();
-            LastTasks = new List<string>();
-            AllTasks = new List<string>();
-            Nodes = new List<Node>();
+            PathOfWrite = pathOfWrite;            
         }
 
         bool isJoinNeeded = false;
 
         bool isSplitNeeded = false;
-
+        /// <summary>
+        /// Ссылка на обрабатываемый лог
+        /// </summary>
         public string PathOfLog { get; set; }
-
+        /// <summary>
+        /// Ссылка на каталог для записи графа
+        /// </summary>
         public string PathOfWrite { get; set; }
 
         List<string> FirstTasks { get; set; }
@@ -38,23 +44,28 @@ namespace AlphaMiner
 
         List<Node> Nodes { get; set; }
 
-        //EventLogConnector.EvLog EventLog { get; set; }
+        EventLogConnector.EvLog EventLog { get; set; }
 
         DotWriter Writer { get; set; }
 
         bool IsInLog = false; // Not needed in release
-
-        // Метод запуска алгоритма
+                
         public void StartAlpha(bool isInLog)
         {
-            //TODO: 1) Написать XML-комментарии для каждого метода и свойства в программе
-            //      2) Разобраться, почему нумерация у вершин задач идет в порядке 1,4 (,5,6...)
-            //      3) Реализовать класс Event, в котором будут задачи и их ID
+            FirstTasks = new List<string>();
+            LastTasks = new List<string>();
+            AllTasks = new List<string>();
+            Nodes = new List<Node>();
+            //TODO: WARNING!!! - алгоритм UniteNodes работает НЕПРАВИЛЬНО, т.к. необходимо создавать НОВЫЕ Node,
+            //      а не обрабатывать старые!!!!!!!!!!!!!!!!!!!!!!!!!
+            //      0) Создать ГРАМОТНЫЙ алгоритм по созданию НАЧАЛЬНЫХ и КОНЕЧНЫХ Node,
+            //      проверка на тесте (abcde, baced, c), а также необходимо создавать несколько AND-Split и AND-Join
+            //      1) Написать XML-комментарии для каждого метода и свойства в программе - В процессе
             int num;
             this.IsInLog = isInLog;
             if (isInLog)
             {
-                //EventLog = new EvLog(PathOfLog);
+                EventLog = new EvLog(PathOfLog);
             }
             GetTasks();
             AllTasks.Add("AND-split");
@@ -83,17 +94,20 @@ namespace AlphaMiner
         // Получает и записывает все Task (Event), встречающиеся в логе
         void GetTasks()
         {
-            /*
+            
             if (IsInLog)
             {
-                //Activity[] activities = EventLog.qryl_get_activities();
+                Activity[] activities = EventLog.qryl_get_activities();
                 foreach (var act in activities)
                 {
+                    if (AllTasks.Contains(act.Name))
+                        throw new WrongFormatOfEventsException($"Некорректный набор встреающихся задач: " +
+                            $"задача {act.Name} встретилась дважды!");
                     AllTasks.Add(act.Name);
                 }
                 return;
             }
-            */
+            
             Console.WriteLine("Write down all types of tasks that used in log in format A, B, etc.");
             foreach (var task in Console.ReadLine().Split(new char[] { ' ', ',', ';', '\'', '\"' }, StringSplitOptions.RemoveEmptyEntries))
             {
@@ -130,21 +144,29 @@ namespace AlphaMiner
         // Получает поочередно строку Trace по их количеству, в релизе НЕ НУЖЕН! 
         void GetData(int num)
         {
-            /*
+            
             if (num == -1)
             {
                 Trace[] traces = EventLog.FindEventsForAllTraces();
                 foreach (var trace in traces)
                 {
-                    List<string> act = new List<string>();
-                    foreach (var activity in trace.traceEvents)
+                    try
                     {
-                        act.Add(activity.activity.Name);
+                        List<string> act = new List<string>();
+                        foreach (var activity in trace.traceEvents)
+                        {
+                            act.Add(activity.activity.Name);
+                        }
+                        GetRelationships(act.ToArray());
                     }
-                    GetRelationships(act.ToArray());
+                    catch
+                    {
+                        throw new WrongFormatOfTraceException($"Получен неверный формат трейса или обнаружена" +
+                            $" необъявленная задача! Номер трейса: {Array.IndexOf(traces, trace)}");
+                    }
                 }
             }
-            */
+            
             Console.WriteLine("Write down all traces in format A B C, etc. : ");
             for (int i = 0; i < num; i++)
             {
@@ -156,6 +178,31 @@ namespace AlphaMiner
         // Создает узлы для их дальнейшей записи и представления в формате DOT
         void GetNodes()
         {
+            var firstNodes = GetInput();
+            var secondNodes = GetOutput();            
+            
+            List<Node> checking = new List<Node>();
+            foreach (var node in firstNodes)
+            {
+                checking.Add(node);
+                CheckOutputOfNode(node, checking);
+            }
+            firstNodes = checking;
+            checking = new List<Node>();
+            foreach (var node in secondNodes)
+            {
+                checking.Add(node);
+                CheckInputOfNode(node, checking);
+            }
+            secondNodes = checking;
+            Nodes = UniteNodes(firstNodes, secondNodes);
+            GetInputOutputNodes(); // Работает правильно (вроде)            
+            return;
+        }
+
+        List<Node> GetInput()
+        {
+            var firstNodes = new List<Node>();
             foreach (var firstTask in AllTasks)
             {
                 var node = new Node();
@@ -169,42 +216,33 @@ namespace AlphaMiner
                     }
                 }
                 if (node.OutputTasks.Count != 0)
-                    Nodes.Add(node);
+                    firstNodes.Add(node);
             }
-            List<Node> unity = new List<Node>();
-            for (int i = 0; i < Nodes.Count; i++)
-            {
-                for (int j = 0; j < Nodes.Count; j++)
-                {
-                    if (i != j)
-                        Nodes[i] = UniteNodes(Nodes[i], Nodes[j], unity);
-                }
-            }
-            if(unity.Count>0)
-            {
-                Nodes = unity;
-                unity = null;
-            }
-            List<Node> checking = new List<Node>();
-            foreach (var node in Nodes)
-            {
-                checking.Add(node);
-                CheckNode(node, checking);
-            }
-            Nodes = checking;
-            checking = new List<Node>();
-            foreach (var node in Nodes)
-            {
-                if (checking.Count(x => x == node) < 1)
-                    checking.Add(node);
-            }
-            Nodes = checking;
-            checking = null;
-            GetInputOutputNodes(); // Работает немного неправильно, для нескольких параллельных задач, необходимо протестить
-            return;
+            return firstNodes;
         }
 
-        // Объединяет найденные узлы и изменяет их
+        List<Node> GetOutput()
+        {
+            var secondNodes = new List<Node>();
+            foreach (var firstTask in AllTasks)
+            {
+                var node = new Node();
+                node.OutputTasks.Add(firstTask);
+
+                foreach (var secondTask in AllTasks)
+                {
+                    if (Matrix[secondTask, firstTask] == ">")
+                    {
+                        node.InputTasks.Add(secondTask);
+                    }
+                }
+                if (node.InputTasks.Count != 0)
+                    secondNodes.Add(node);
+            }
+            return secondNodes;
+        }
+
+        // РАБОТАЕТ НЕПРАВИЛЬНО!!!!!!!!!!!!!!!!!!!!!
         Node UniteNodes(Node first, Node second, List<Node> nodes)
         {
             if (first.OutputTasks.All(x => second.OutputTasks.Contains(x)))
@@ -248,7 +286,7 @@ namespace AlphaMiner
             return first;
         }
 
-        // Производит объединение 2-х множеств InputTasks по установленному порядку
+        // СРОЧНО ПЕРЕПИСАТЬ!!!!!!!!!!!!!!!!!!!!!!!!!
         void UniteInputTasks(List<string> first, List<string> second)
         {
             foreach (var firstTask in first)
@@ -257,6 +295,7 @@ namespace AlphaMiner
                 foreach (var secondTask in second)
                 {
                     if (Matrix[firstTask, secondTask] != "#" || Matrix[secondTask, firstTask] != "#")
+                    //if (Matrix[firstTask, secondTask] == "||")
                         flag = false;
                     if (firstTask == secondTask)
                         flag = false;
@@ -268,14 +307,13 @@ namespace AlphaMiner
         }
 
         // Проверяет мн-во OutputTasks на предмет несоотв. связей для узла
-        void CheckNode(Node node, List<Node> nodes)
+        void CheckOutputOfNode(Node node, List<Node> nodes)
         {
             foreach (var first in node.OutputTasks)
             {
                 foreach (var second in node.OutputTasks)
                 {
-                    //if (Matrix[first, second] != "#" || Matrix[second, first] != "#")
-                    if (Matrix[first, second] == "||")
+                    if (Matrix[first, second] != "#" || Matrix[second, first] != "#")
                     {
                         string[] tasks = new string[node.OutputTasks.Count];
                         node.OutputTasks.CopyTo(tasks);
@@ -296,14 +334,94 @@ namespace AlphaMiner
                         nodes.Remove(node);
                         nodes.Add(firstNode);
                         nodes.Add(secondNode);
-                        CheckNode(firstNode, nodes);
-                        CheckNode(secondNode, nodes);
+                        CheckOutputOfNode(firstNode, nodes);
+                        CheckOutputOfNode(secondNode, nodes);
                         goto EndOfChecking;
                     }
                 }
             }
         EndOfChecking:
             return;
+        }
+
+        void CheckInputOfNode(Node node, List<Node> nodes)
+        {
+            foreach (var first in node.InputTasks)
+            {
+                foreach (var second in node.InputTasks)
+                {
+                    if (Matrix[first, second] != "#" || Matrix[second, first] != "#")
+                    {
+                        string[] tasks = new string[node.InputTasks.Count];
+                        node.InputTasks.CopyTo(tasks);
+                        var firstList = new List<string>(tasks);
+                        var secondList = new List<string>(tasks);
+                        firstList.Remove(first);
+                        secondList.Remove(second);
+                        var firstNode = new Node()
+                        {
+                            InputTasks = firstList,
+                            OutputTasks = node.OutputTasks
+                        };
+                        var secondNode = new Node()
+                        {
+                            InputTasks = secondList,
+                            OutputTasks = node.OutputTasks
+                        };
+                        nodes.Remove(node);
+                        nodes.Add(firstNode);
+                        nodes.Add(secondNode);
+                        CheckInputOfNode(firstNode, nodes);
+                        CheckInputOfNode(secondNode, nodes);
+                        goto EndOfChecking;
+                    }
+                }
+            }
+        EndOfChecking:
+            return;
+        }
+
+        List<Node> UniteNodes(List<Node> input, List<Node> output)
+        {
+            var nodes = new List<Node>();
+            foreach (var first in input)
+            {
+                foreach (var second in output)
+                {
+                    if (second.InputTasks.Contains(first.InputTasks[0]))
+                    {
+                        var node = new Node();
+                        node.OutputTasks = new List<string>(first.OutputTasks);
+                        node.InputTasks = new List<string>(first.InputTasks);
+                        foreach (var task in second.InputTasks)
+                        {
+                            if (first.OutputTasks.All(x => Matrix[task, x] == ">") && !node.InputTasks.Contains(task))
+                                node.InputTasks.Add(task);
+                        }
+                        nodes.Add(node);
+                    }
+                    if (first.OutputTasks.Contains(second.OutputTasks[0]))
+                    {
+                        var node = new Node();
+                        node.OutputTasks = new List<string>(second.OutputTasks);
+                        node.InputTasks = new List<string>(second.InputTasks);
+                        foreach (var task in first.OutputTasks)
+                        {
+                            if (second.InputTasks.All(x => Matrix[x, task] == ">") && !node.OutputTasks.Contains(task))
+                                node.OutputTasks.Add(task);
+                        }
+                        nodes.Add(node);
+                    }
+                }
+            }
+            var result = new List<Node>(nodes);
+            // До данного момента работает правильно, переделать проверку!!!
+            foreach (var node in nodes)
+            {
+                if (result.Any(x => node <= x))
+                    result.Remove(node);
+            }
+            return result;
         }
 
         // Создает начальные и конечные узлы
@@ -323,8 +441,8 @@ namespace AlphaMiner
                 InputTasks = null
             }
             };
-            CheckNode(outputNodes[0], outputNodes);
-            CheckNode(inputNodes[0], inputNodes);
+            CheckOutputOfNode(outputNodes[0], outputNodes);
+            CheckOutputOfNode(inputNodes[0], inputNodes);
             if (inputNodes.Count > 1)
             {
                 isSplitNeeded = true;
@@ -366,3 +484,46 @@ namespace AlphaMiner
         }
     }
 }
+
+/*
+            foreach (var firstTask in AllTasks)
+            {
+                var node = new Node();
+                node.InputTasks.Add(firstTask);
+
+                foreach (var secondTask in AllTasks)
+                {
+                    if (Matrix[firstTask, secondTask] == ">")
+                    {
+                        node.OutputTasks.Add(secondTask);
+                    }
+                }
+                if (node.OutputTasks.Count != 0)
+                    firstNodes.Add(node);
+            }
+            List<Node> unity = new List<Node>();
+            for (int i = 0; i < Nodes.Count; i++)
+            {
+                for (int j = 0; j < Nodes.Count; j++)
+                {
+                    if (i != j)
+                        Nodes[i] = UniteNodes(Nodes[i], Nodes[j], unity);
+                }
+            }
+            if (unity.Count > 0)
+            {
+                Nodes = unity;
+                unity = null;
+            }
+
+
+
+            checking = new List<Node>();
+            foreach (var node in Nodes)
+            {
+                if (checking.Count(x => x == node) < 1)
+                    checking.Add(node);
+            }
+            Nodes = checking;
+            checking = null;
+            */
