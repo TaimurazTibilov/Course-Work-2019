@@ -196,7 +196,14 @@ namespace AlphaMiner
             }
             secondNodes = checking;
             Nodes = UniteNodes(firstNodes, secondNodes);
-            GetInputOutputNodes(); // Работает правильно (вроде)            
+            GetInputOutputNodes();
+            var result = new List<Node>(Nodes);
+            foreach (var node in Nodes)
+            {
+                if (result.Count(x => node <= x) > 1)
+                    result.Remove(node);
+            }
+            Nodes = result;
             return;
         }
 
@@ -241,71 +248,7 @@ namespace AlphaMiner
             }
             return secondNodes;
         }
-
-        // РАБОТАЕТ НЕПРАВИЛЬНО!!!!!!!!!!!!!!!!!!!!!
-        Node UniteNodes(Node first, Node second, List<Node> nodes)
-        {
-            if (first.OutputTasks.All(x => second.OutputTasks.Contains(x)))
-            {
-                if (second.OutputTasks.All(x => first.OutputTasks.Contains(x)))
-                {
-                    UniteInputTasks(first.InputTasks, second.InputTasks);
-                    if (first == second)
-                    {
-                        nodes.Add(first);
-                        if (nodes.Count(x => x == first) > 1)
-                        {
-                            nodes.RemoveAll(x => x == first);
-                            nodes.Add(first);
-                        }
-                        return first;
-                    }
-                    goto EndOfUnion;
-                }
-                UniteInputTasks(second.InputTasks, first.InputTasks);
-                goto EndOfUnion;
-            }
-            if (second.OutputTasks.All(x => first.OutputTasks.Contains(x)))
-            {
-                UniteInputTasks(first.InputTasks, second.InputTasks);
-                goto EndOfUnion;
-            }
-            EndOfUnion:
-            nodes.Add(first);
-            nodes.Add(second);
-            if (nodes.Count(x => x == first) > 1)
-            {
-                nodes.RemoveAll(x => x == first);
-                nodes.Add(first);
-            }
-            if (nodes.Count(x => x == second) > 1)
-            {
-                nodes.RemoveAll(x => x == second);
-                nodes.Add(second);
-            }
-            return first;
-        }
-
-        // СРОЧНО ПЕРЕПИСАТЬ!!!!!!!!!!!!!!!!!!!!!!!!!
-        void UniteInputTasks(List<string> first, List<string> second)
-        {
-            foreach (var firstTask in first)
-            {
-                bool flag = true;
-                foreach (var secondTask in second)
-                {
-                    if (Matrix[firstTask, secondTask] != "#" || Matrix[secondTask, firstTask] != "#")
-                    //if (Matrix[firstTask, secondTask] == "||")
-                        flag = false;
-                    if (firstTask == secondTask)
-                        flag = false;
-                }
-                if (flag)
-                    second.Add(firstTask);
-            }
-            return;
-        }
-
+        
         // Проверяет мн-во OutputTasks на предмет несоотв. связей для узла
         void CheckOutputOfNode(Node node, List<Node> nodes)
         {
@@ -315,10 +258,8 @@ namespace AlphaMiner
                 {
                     if (Matrix[first, second] != "#" || Matrix[second, first] != "#")
                     {
-                        string[] tasks = new string[node.OutputTasks.Count];
-                        node.OutputTasks.CopyTo(tasks);
-                        var firstList = new List<string>(tasks);
-                        var secondList = new List<string>(tasks);
+                        var firstList = new List<string>(node.OutputTasks);
+                        var secondList = new List<string>(node.OutputTasks);
                         firstList.Remove(first);
                         secondList.Remove(second);
                         var firstNode = new Node()
@@ -352,10 +293,8 @@ namespace AlphaMiner
                 {
                     if (Matrix[first, second] != "#" || Matrix[second, first] != "#")
                     {
-                        string[] tasks = new string[node.InputTasks.Count];
-                        node.InputTasks.CopyTo(tasks);
-                        var firstList = new List<string>(tasks);
-                        var secondList = new List<string>(tasks);
+                        var firstList = new List<string>(node.InputTasks);
+                        var secondList = new List<string>(node.InputTasks);
                         firstList.Remove(first);
                         secondList.Remove(second);
                         var firstNode = new Node()
@@ -414,14 +353,7 @@ namespace AlphaMiner
                     }
                 }
             }
-            var result = new List<Node>(nodes);
-            // До данного момента работает правильно, переделать проверку!!!
-            foreach (var node in nodes)
-            {
-                if (result.Any(x => node <= x))
-                    result.Remove(node);
-            }
-            return result;
+            return nodes;
         }
 
         // Создает начальные и конечные узлы

@@ -45,19 +45,27 @@ namespace AlphaMiner
 
         public static bool operator >=(Node first, Node second)
         {
-            if (second.InputTasks.All(x => first.InputTasks.Contains(x)))
+            return second <= first;
+        }
+
+        public static bool operator <=(Node first, Node second)
+        {
+            if (first.InputTasks == null && second.InputTasks != null)
+                return false;
+            if (first.InputTasks != null && second.InputTasks == null)
+                return false;
+            if (first.OutputTasks != null && second.OutputTasks == null)
+                return false;
+            if (first.OutputTasks == null && second.OutputTasks != null)
+                return false;
+            if ((first.InputTasks == null && second.InputTasks == null) || first.InputTasks.All(x => second.InputTasks.Contains(x)))
             {
-                if (second.OutputTasks.All(x => first.OutputTasks.Contains(x)))
+                if ((first.OutputTasks == null && second.OutputTasks == null) || first.OutputTasks.All(x => second.OutputTasks.Contains(x)))
                 {
                     return true;
                 }
             }
             return false;
-        }
-
-        public static bool operator <=(Node first, Node second)
-        {
-            return second >= first;
         }
     }
 }
