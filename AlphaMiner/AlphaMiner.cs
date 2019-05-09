@@ -22,45 +22,75 @@ namespace AlphaMiner
             PathOfWrite = pathOfWrite;            
         }
 
+        /// <summary>
+        /// Указывает на необходимость дополнительного соединяющего узла в конце графа
+        /// </summary>
         bool isJoinNeeded = false;
 
+        /// <summary>
+        /// Указывает на необходимость дополнительного соединяющего узла в начале графа
+        /// </summary>
         bool isSplitNeeded = false;
+
         /// <summary>
         /// Ссылка на обрабатываемый лог
         /// </summary>
         public string PathOfLog { get; set; }
+
         /// <summary>
         /// Ссылка на каталог для записи графа
         /// </summary>
         public string PathOfWrite { get; set; }
 
+        /// <summary>
+        /// Список задач, встречающихся в начале "следа"
+        /// </summary>
         List<string> FirstTasks { get; set; }
 
+        /// <summary>
+        /// Список задач, встречающихся в конце "следа"
+        /// </summary>
         List<string> LastTasks { get; set; }
 
+        /// <summary>
+        /// Список всех задач лога
+        /// </summary>
         internal List<string> AllTasks { get; set; }
 
+        /// <summary>
+        /// Матрица зависимостей задач в логе
+        /// </summary>
         AdjacencyMatrix Matrix { get; set; }
 
+        /// <summary>
+        /// Список узлов будущей сети Петри
+        /// </summary>
         List<Node> Nodes { get; set; }
 
+        /// <summary>
+        /// Объект сторонней библиотеки, обрабатывающей логи
+        /// </summary>
         EventLogConnector.EvLog EventLog { get; set; }
 
+        /// <summary>
+        /// Объект для записи конечного графа в формате .DOT с помощью полученных узлов
+        /// </summary>
         DotWriter Writer { get; set; }
 
-        bool IsInLog = false; // Not needed in release
-                
+        bool IsInLog = false;
+        
+        /// <summary>
+        /// Метод запуска алгоритма для обработки лога и записи полученной сети Петри
+        /// </summary>
+        /// <exception cref="WrongFormatOfEventsException"></exception>
+        /// <exception cref="WrongFormatOfTraceException"></exception>
+        /// <exception cref="WrongFormatOfPetriPathException"></exception>
         public void StartAlpha(bool isInLog)
         {
             FirstTasks = new List<string>();
             LastTasks = new List<string>();
             AllTasks = new List<string>();
             Nodes = new List<Node>();
-            //TODO: WARNING!!! - алгоритм UniteNodes работает НЕПРАВИЛЬНО, т.к. необходимо создавать НОВЫЕ Node,
-            //      а не обрабатывать старые!!!!!!!!!!!!!!!!!!!!!!!!!
-            //      0) Создать ГРАМОТНЫЙ алгоритм по созданию НАЧАЛЬНЫХ и КОНЕЧНЫХ Node,
-            //      проверка на тесте (abcde, baced, c), а также необходимо создавать несколько AND-Split и AND-Join
-            //      1) Написать XML-комментарии для каждого метода и свойства в программе - В процессе
             int num;
             this.IsInLog = isInLog;
             if (isInLog)
@@ -87,11 +117,14 @@ namespace AlphaMiner
                 isSplitNeeded = this.isSplitNeeded,
                 isJoinNeeded = this.isJoinNeeded
             };
-            Writer.WriteGraphToDOT(PathOfWrite);
+            Writer.WriteGraph(PathOfWrite);
             return;
         }
 
-        // Получает и записывает все Task (Event), встречающиеся в логе
+        /// <summary>
+        /// Получает и записывает все Task (Event), встречающиеся в логе
+        /// </summary>
+        /// <exception cref="WrongFormatOfEventsException"></exception>
         void GetTasks()
         {
             
@@ -116,7 +149,10 @@ namespace AlphaMiner
             return;
         }
 
-        // Обрабатывает полученный на вход Trace, составляет по нему отношение между задачами
+        /// <summary>
+        /// Обрабатывает полученный на вход Trace, составляет по нему отношение между задачами
+        /// </summary>
+        /// <param name="trace">Массив Trace</param>
         void GetRelationships(string[] trace)
         {
             if (!FirstTasks.Contains(trace[0]))
@@ -141,10 +177,11 @@ namespace AlphaMiner
             }
         }
 
-        // Получает поочередно строку Trace по их количеству, в релизе НЕ НУЖЕН! 
+        /// <summary>
+        /// Получает массив элементов Trace
+        /// </summary>
         void GetData(int num)
-        {
-            
+        {            
             if (num == -1)
             {
                 Trace[] traces = EventLog.FindEventsForAllTraces();
@@ -175,7 +212,9 @@ namespace AlphaMiner
             }
         }
 
-        // Создает узлы для их дальнейшей записи и представления в формате DOT
+        /// <summary>
+        /// Создает узлы для их дальнейшей записи и представления в формате DOT
+        /// </summary>
         void GetNodes()
         {
             var firstNodes = GetInput();
@@ -207,6 +246,10 @@ namespace AlphaMiner
             return;
         }
 
+        /// <summary>
+        /// Для каждой задачи создает множество узлов задач, в которые происходит переход
+        /// </summary>
+        /// <returns>Возвращает множество узлов задач</returns>
         List<Node> GetInput()
         {
             var firstNodes = new List<Node>();
@@ -228,6 +271,10 @@ namespace AlphaMiner
             return firstNodes;
         }
 
+        /// <summary>
+        /// Для каждой задачи создает множество узлов задач, из которых происходит переход
+        /// </summary>
+        /// <returns>Возвращает множество узлов задач</returns>
         List<Node> GetOutput()
         {
             var secondNodes = new List<Node>();
@@ -248,8 +295,12 @@ namespace AlphaMiner
             }
             return secondNodes;
         }
-        
-        // Проверяет мн-во OutputTasks на предмет несоотв. связей для узла
+
+        /// <summary>
+        /// Проверяет мн-во OutputTasks на предмет несоотв. связей для узла
+        /// </summary>
+        /// <param name="node">Проверяемый узел</param>
+        /// <param name="nodes">Список узлов, из которого взят проверяемый узел</param>
         void CheckOutputOfNode(Node node, List<Node> nodes)
         {
             foreach (var first in node.OutputTasks)
@@ -285,6 +336,11 @@ namespace AlphaMiner
             return;
         }
 
+        /// <summary>
+        /// Проверяет мн-во InputTasks на предмет несоотв. связей для узла
+        /// </summary>
+        /// <param name="node">Проверяемый узел</param>
+        /// <param name="nodes">Список узлов, из которого взят проверяемый узел</param>
         void CheckInputOfNode(Node node, List<Node> nodes)
         {
             foreach (var first in node.InputTasks)
@@ -320,6 +376,12 @@ namespace AlphaMiner
             return;
         }
 
+        /// <summary>
+        /// Объединяет списки узлов с разными наборами последних
+        /// </summary>
+        /// <param name="input">Узлы, содержащие одну задачу на входе</param>
+        /// <param name="output">Узлы, содержащие одну задачу на выходе</param>
+        /// <returns>Список всех конечных узлов без учета проверок и начальных/конечных узлов</returns>
         List<Node> UniteNodes(List<Node> input, List<Node> output)
         {
             var nodes = new List<Node>();
@@ -356,7 +418,9 @@ namespace AlphaMiner
             return nodes;
         }
 
-        // Создает начальные и конечные узлы
+        /// <summary>
+        /// Создает начальные и конечные узлы
+        /// </summary>
         void GetInputOutputNodes()
         {
             List<Node> inputNodes = new List<Node>()
@@ -416,46 +480,3 @@ namespace AlphaMiner
         }
     }
 }
-
-/*
-            foreach (var firstTask in AllTasks)
-            {
-                var node = new Node();
-                node.InputTasks.Add(firstTask);
-
-                foreach (var secondTask in AllTasks)
-                {
-                    if (Matrix[firstTask, secondTask] == ">")
-                    {
-                        node.OutputTasks.Add(secondTask);
-                    }
-                }
-                if (node.OutputTasks.Count != 0)
-                    firstNodes.Add(node);
-            }
-            List<Node> unity = new List<Node>();
-            for (int i = 0; i < Nodes.Count; i++)
-            {
-                for (int j = 0; j < Nodes.Count; j++)
-                {
-                    if (i != j)
-                        Nodes[i] = UniteNodes(Nodes[i], Nodes[j], unity);
-                }
-            }
-            if (unity.Count > 0)
-            {
-                Nodes = unity;
-                unity = null;
-            }
-
-
-
-            checking = new List<Node>();
-            foreach (var node in Nodes)
-            {
-                if (checking.Count(x => x == node) < 1)
-                    checking.Add(node);
-            }
-            Nodes = checking;
-            checking = null;
-            */

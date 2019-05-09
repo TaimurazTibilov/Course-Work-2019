@@ -17,10 +17,6 @@ namespace AlphaMiner
 
         List<Node> Nodes { get; set; }
 
-        VertexesOfTasks Vertexes { get; set; }
-
-        string Graph { get; set; }
-
         string Vertex
         {
             get { return "A" + (counter++).ToString(); }
@@ -34,19 +30,16 @@ namespace AlphaMiner
             Nodes = nodes;
         }
 
-        internal void WriteGraphToDOT(string PATH)
+        string CreateGraph()
         {
-            if (PATH[PATH.Length - 1] == '/')
-                PATH += @"WFNet.DOT";
-            else
-                PATH += @"/WFNet.DOT";
-            Vertexes = new VertexesOfTasks(AllTasks);
-            Graph = "digraph WFnet {\n";
+            string graph;
+            VertexesOfTasks vertexes = new VertexesOfTasks(AllTasks);
+            graph = "digraph WFnet {\n";
             foreach (var node in Nodes)
             {
                 string v = Vertex;
-                node.Vertex = v; 
-                Graph += $"\t{v} [label=\"\", shape=circle];\n";
+                node.Vertex = v;
+                graph += $"\t{v} [label=\"\", shape=circle];\n";
             }
             foreach (var task in AllTasks)
             {
@@ -54,24 +47,35 @@ namespace AlphaMiner
                     continue;
                 if (task == "AND-join" && (!isJoinNeeded))
                     continue;
-                Graph += $"\t{Vertexes[task]} [label=\"{task}\", shape=box];\n";
+                graph += $"\t{vertexes[task]} [label=\"{task}\", shape=box];\n";
             }
-            GetEdges();
-            Graph += "}";
+            GetEdges(ref graph, vertexes);
+            graph += "}";
+            return graph;
+        }
+
+        internal void WriteGraph(string PATH)
+        {           
             try
             {
+                if (!Directory.Exists(PATH))
+                    Directory.CreateDirectory(PATH);
+                if (PATH[PATH.Length - 1] == '/')
+                    PATH += @"WFNet.DOT";
+                else
+                    PATH += @"/WFNet.DOT";
                 using (StreamWriter writer = new StreamWriter(new FileStream(PATH, FileMode.Create), Encoding.UTF8))
                 {
-                    writer.WriteLine(Graph);
+                    writer.WriteLine(CreateGraph());
                 }
             }
             catch (Exception e)
             {
-                throw new Exception(e.Message);
+                throw new WrongFormatOfPetriPathException(e.Message);
             }
         }
 
-        void GetEdges()
+        void GetEdges(ref string graph, VertexesOfTasks vertexes)
         {
             foreach (var node in Nodes)
             {
@@ -79,14 +83,14 @@ namespace AlphaMiner
                 {
                     foreach (var task in node.InputTasks)
                     {
-                        Graph += $"\t{Vertexes[task]} -> {node.Vertex};\n";
+                        graph += $"\t{vertexes[task]} -> {node.Vertex};\n";
                     }
                 }
                 if (node.OutputTasks != null)
                 {
                     foreach (var task in node.OutputTasks)
                     {
-                        Graph += $"\t{node.Vertex} -> {Vertexes[task]};\n";
+                        graph += $"\t{node.Vertex} -> {vertexes[task]};\n";
                     }
                 }
             }
