@@ -7,6 +7,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CourseWork", "CourseWork\Co
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AlphaMiner", "AlphaMiner\AlphaMiner.csproj", "{19091F6C-907D-44DC-9918-179DE78C5D1D}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UnitTests", "UnitTests\UnitTests.csproj", "{1011E906-49AE-4F66-B756-0E74C240DE6C}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -21,6 +23,10 @@ Global
 		{19091F6C-907D-44DC-9918-179DE78C5D1D}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{19091F6C-907D-44DC-9918-179DE78C5D1D}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{19091F6C-907D-44DC-9918-179DE78C5D1D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1011E906-49AE-4F66-B756-0E74C240DE6C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1011E906-49AE-4F66-B756-0E74C240DE6C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1011E906-49AE-4F66-B756-0E74C240DE6C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1011E906-49AE-4F66-B756-0E74C240DE6C}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
