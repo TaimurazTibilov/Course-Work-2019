@@ -8,18 +8,36 @@ namespace AlphaMiner
 {
     internal class Node
     {
+        /// <summary>
+        /// Конструктор узла, создает списки входных и выходных задач (событий) лога
+        /// </summary>
         internal Node()
         {
             InputTasks = new List<string>();
             OutputTasks = new List<string>();
         }
 
+        /// <summary>
+        /// Входные задачи (события) лога
+        /// </summary>
         internal List<string> InputTasks { get; set; }
 
+        /// <summary>
+        /// Выходные задачи (события) лога
+        /// </summary>
         internal List<string> OutputTasks { get; set; }
 
+        /// <summary>
+        /// Обозначение вершины позиции для записи в формате .DOT
+        /// </summary>
         internal string Vertex { get; set; }
 
+        /// <summary>
+        /// Оператор сравнения на равенство узлов
+        /// </summary>
+        /// <param name="first">Сравниваемый узел</param>
+        /// <param name="second">Сравниваемый узел</param>
+        /// <returns>Возвращает, равны ли узлы или нет</returns>
         public static bool operator ==(Node first, Node second)
         {
             if (first.InputTasks == null && second.InputTasks == null)
@@ -38,16 +56,34 @@ namespace AlphaMiner
                 return false;
         }
 
+        /// <summary>
+        /// Оператор сравнения на неравенство узлов
+        /// </summary>
+        /// <param name="first">Сравниваемый узел</param>
+        /// <param name="second">Сравниваемый узел</param>
+        /// <returns>Возвращает, неравны ли узлы или нет</returns>
         public static bool operator !=(Node first, Node second)
         {
             return !(first == second);
         }
 
+        /// <summary>
+        /// Оператор сравнения на вхождение узлов
+        /// </summary>
+        /// <param name="first">Сравниваемый узел</param>
+        /// <param name="second">Сравниваемый узел</param>
+        /// <returns>Возвращает, содержит ли первый узел значения второго узла</returns>
         public static bool operator >=(Node first, Node second)
         {
             return second <= first;
         }
 
+        /// <summary>
+        /// Оператор сравнения на вхождение узлов
+        /// </summary>
+        /// <param name="first">Сравниваемый узел</param>
+        /// <param name="second">Сравниваемый узел</param>
+        /// <returns>Возвращает, содержит ли второй узел значения первого узла</returns>
         public static bool operator <=(Node first, Node second)
         {
             if (first.InputTasks == null && second.InputTasks != null)

@@ -9,27 +9,54 @@ namespace AlphaMiner
 {
     internal class DotWriter
     {
+        /// <summary>
+        /// Указывает на необходимость дополнительного соединяющего узла в конце графа
+        /// </summary>
         internal bool isJoinNeeded = false;
 
+        /// <summary>
+        /// Указывает на необходимость дополнительного соединяющего узла в начале графа
+        /// </summary>
         internal bool isSplitNeeded = false;
 
+        /// <summary>
+        /// Список всех задач лога
+        /// </summary>
         List<string> AllTasks { get; set; }
 
+        /// <summary>
+        /// Список всех узлов сети Петри
+        /// </summary>
         List<Node> Nodes { get; set; }
 
+        /// <summary>
+        /// Генератор обозначений вершин
+        /// </summary>
         string Vertex
         {
             get { return "A" + (counter++).ToString(); }
         }
 
+        /// <summary>
+        /// Копилка
+        /// </summary>
         int counter = 1;
 
+        /// <summary>
+        /// Конструктор объекта записи графа в формате .DOT
+        /// </summary>
+        /// <param name="allTasks">Список всех задач</param>
+        /// <param name="nodes">Все узлы графа</param>
         internal DotWriter(List<string> allTasks, List<Node> nodes)
         {
             AllTasks = allTasks;
             Nodes = nodes;
         }
 
+        /// <summary>
+        /// Представляет граф в формате .DOT исходя из данных объекта
+        /// </summary>
+        /// <returns>Строковое представлеие графа</returns>
         string CreateGraph()
         {
             string graph;
@@ -54,6 +81,10 @@ namespace AlphaMiner
             return graph;
         }
 
+        /// <summary>
+        /// Метод записи графа в указанный каталог и его сохранения в формате .DOT
+        /// </summary>
+        /// <param name="PATH">Ссылка на каталог для сохранения графа</param>
         internal void WriteGraph(string PATH)
         {           
             try
@@ -75,6 +106,11 @@ namespace AlphaMiner
             }
         }
 
+        /// <summary>
+        /// Метод для создания дуг сети Петри по полученным вершинам
+        /// </summary>
+        /// <param name="graph">Строковое представление графа для записи</param>
+        /// <param name="vertexes">Список вершин по задачам</param>
         void GetEdges(ref string graph, VertexesOfTasks vertexes)
         {
             foreach (var node in Nodes)

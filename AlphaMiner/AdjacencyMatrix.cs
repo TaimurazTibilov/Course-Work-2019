@@ -8,7 +8,10 @@ namespace AlphaMiner
 {
     internal class AdjacencyMatrix
     {
-        //Здесь создается матрица смежности для всех Event, по умолчанию заполняется "#"
+        /// <summary>
+        /// Здесь создается матрица смежности для всех Event, по умолчанию заполняется "#"
+        /// </summary>
+        /// <param name="allTasks">Список всех задач лога</param>
         internal AdjacencyMatrix(List<string> allTasks)
         {
             AllTasks = allTasks;
@@ -22,31 +25,26 @@ namespace AlphaMiner
             }
         }
 
+        /// <summary>
+        /// Список всех задач лога
+        /// </summary>
         List<string> AllTasks { get; set; }
 
+        /// <summary>
+        /// Матрица зависимостей задач
+        /// </summary>
         string[,] Matrix { get; set; }
 
-        // Индексатор, с помощью него можно  получить информацию об отношении 2-х Event
+        /// <summary>
+        /// Индексатор, с помощью него можно  получить информацию об отношении 2-х Event
+        /// </summary>
+        /// <param name="i">i-я задача</param>
+        /// <param name="j">j-я задача</param>
+        /// <returns></returns>
         internal string this[string i, string j]
         {
             get { return Matrix[AllTasks.IndexOf(i), AllTasks.IndexOf(j)]; }
             set { Matrix[AllTasks.IndexOf(i), AllTasks.IndexOf(j)] = value; }
-        }
-
-        // Ищет задачи, происходящие параллельно друг от друга (применяется после заполнения)
-        void FindParallels()
-        {
-            for (int i = 0; i < AllTasks.Count; i++)
-            {
-                for (int j = i + 1; j < AllTasks.Count; i++)
-                {
-                    if (Matrix[i, j] == ">" && Matrix[j, i] == ">")
-                    {
-                        Matrix[i, j] = "||";
-                        Matrix[j, i] = "||";
-                    }
-                }
-            }
         }
     }
 }

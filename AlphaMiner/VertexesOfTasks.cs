@@ -13,6 +13,11 @@ namespace AlphaMiner
         string[] vertexes;
         string[] tasks;
 
+        /// <summary>
+        /// Конструктор, создает строковое представление (уникальное обозначение)
+        /// для вершин событий (задач)
+        /// </summary>
+        /// <param name="allTasks">Задачи (события), встречающиеся в логе</param>
         public VertexesOfTasks(List<string> allTasks)
         {
             int count = 0;
@@ -27,11 +32,19 @@ namespace AlphaMiner
             Array.Sort(tasks);
         }
 
+        /// <summary>
+        /// Генератор уникального обозначения вершины
+        /// </summary>
         string Vertex
         {
             get { return "B" + (counter++).ToString(); }
         }
 
+        /// <summary>
+        /// Индексатор, возвращает уникальное обозначение вершины по ее значению
+        /// </summary>
+        /// <param name="task">Значение вершины события (задачи)</param>
+        /// <returns></returns>
         internal string this[string task]
         {
             get { return vertexes[Array.BinarySearch<string>(tasks, task)]; }
