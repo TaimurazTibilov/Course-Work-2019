@@ -65,7 +65,7 @@ namespace AlphaMiner
         /// <summary>
         /// Список узлов будущей сети Петри
         /// </summary>
-        List<Node> Nodes { get; set; }
+        HashSet<Node> Nodes { get; set; }
 
         /// <summary>
         /// Объект сторонней библиотеки, обрабатывающей логи
@@ -90,7 +90,7 @@ namespace AlphaMiner
             FirstTasks = new List<string>();
             LastTasks = new List<string>();
             AllTasks = new List<string>();
-            Nodes = new List<Node>();
+            Nodes = new HashSet<Node>();
             int num;
             this.IsInLog = isInLog;
             if (isInLog)
@@ -112,7 +112,7 @@ namespace AlphaMiner
             else
                 GetData(-1);
             GetNodes();
-            Writer = new DotWriter(AllTasks, Nodes)
+            Writer = new DotWriter(AllTasks, new List<Node>(Nodes))
             {
                 isSplitNeeded = this.isSplitNeeded,
                 isJoinNeeded = this.isJoinNeeded
@@ -221,14 +221,14 @@ namespace AlphaMiner
             var firstNodes = GetInput();
             var secondNodes = GetOutput();            
             
-            List<Node> checking = new List<Node>();
+            HashSet<Node> checking = new HashSet<Node>();
             foreach (var node in firstNodes)
             {
                 checking.Add(node);
                 CheckOutputOfNode(node, checking);
             }
             firstNodes = checking;
-            checking = new List<Node>();
+            checking = new HashSet<Node>();
             foreach (var node in secondNodes)
             {
                 checking.Add(node);
@@ -237,7 +237,7 @@ namespace AlphaMiner
             secondNodes = checking;
             Nodes = UniteNodes(firstNodes, secondNodes);
             GetInputOutputNodes();
-            var result = new List<Node>(Nodes);
+            var result = new HashSet<Node>(Nodes);
             foreach (var node in Nodes)
             {
                 if (result.Count(x => node <= x) > 1)
@@ -251,9 +251,9 @@ namespace AlphaMiner
         /// Для каждой задачи создает множество узлов задач, в которые происходит переход
         /// </summary>
         /// <returns>Возвращает множество узлов задач</returns>
-        List<Node> GetInput()
+        HashSet<Node> GetInput()
         {
-            var firstNodes = new List<Node>();
+            var firstNodes = new HashSet<Node>();
             foreach (var firstTask in AllTasks)
             {
                 var node = new Node();
@@ -276,9 +276,9 @@ namespace AlphaMiner
         /// Для каждой задачи создает множество узлов задач, из которых происходит переход
         /// </summary>
         /// <returns>Возвращает множество узлов задач</returns>
-        List<Node> GetOutput()
+        HashSet<Node> GetOutput()
         {
-            var secondNodes = new List<Node>();
+            var secondNodes = new HashSet<Node>();
             foreach (var firstTask in AllTasks)
             {
                 var node = new Node();
@@ -302,20 +302,20 @@ namespace AlphaMiner
         /// </summary>
         /// <param name="node">Проверяемый узел</param>
         /// <param name="nodes">Список узлов, из которого взят проверяемый узел</param>
-        void CheckOutputOfNode(Node node, List<Node> nodes)
+        void CheckOutputOfNode(Node node, HashSet<Node> nodes)
         {
-            // СРОЧНО!!! Здесь необходимо сделать for вместо  foreach сложности n log (n), т.е.
-            // для каждой задачи и вложенный от выбранной первой задачи до конца
-            foreach (var first in node.OutputTasks)
+            if (node.OutputTasks.Count < 2)
+                return;
+            for (int i = 0; i < node.OutputTasks.Count - 1; i++)
             {
-                foreach (var second in node.OutputTasks)
+                for (int j = i + 1; j < node.OutputTasks.Count; j++)
                 {
-                    if (Matrix[first, second] != "#" || Matrix[second, first] != "#")
+                    if (Matrix[node.OutputTasks[i], node.OutputTasks[j]] != "#" || Matrix[node.OutputTasks[j], node.OutputTasks[i]] != "#")
                     {
                         var firstList = new List<string>(node.OutputTasks);
                         var secondList = new List<string>(node.OutputTasks);
-                        firstList.Remove(first);
-                        secondList.Remove(second);
+                        firstList.Remove(node.OutputTasks[i]);
+                        secondList.Remove(node.OutputTasks[j]);
                         var firstNode = new Node()
                         {
                             InputTasks = node.InputTasks,
@@ -344,20 +344,20 @@ namespace AlphaMiner
         /// </summary>
         /// <param name="node">Проверяемый узел</param>
         /// <param name="nodes">Список узлов, из которого взят проверяемый узел</param>
-        void CheckInputOfNode(Node node, List<Node> nodes)
+        void CheckInputOfNode(Node node, HashSet<Node> nodes)
         {
-            // СРОЧНО!!! Здесь необходимо сделать for вместо  foreach сложности n log (n), т.е.
-            // для каждой задачи и вложенный от выбранной первой задачи до конца
-            foreach (var first in node.InputTasks)
+            if (node.InputTasks.Count < 2)
+                return;
+            for (int i = 0; i < node.InputTasks.Count - 1; i++)
             {
-                foreach (var second in node.InputTasks)
+                for (int j = i + 1; j < node.InputTasks.Count; j++)
                 {
-                    if (Matrix[first, second] != "#" || Matrix[second, first] != "#")
+                    if (Matrix[node.InputTasks[i], node.InputTasks[j]] != "#" || Matrix[node.InputTasks[j], node.InputTasks[i]] != "#")
                     {
                         var firstList = new List<string>(node.InputTasks);
                         var secondList = new List<string>(node.InputTasks);
-                        firstList.Remove(first);
-                        secondList.Remove(second);
+                        firstList.Remove(node.InputTasks[i]);
+                        secondList.Remove(node.InputTasks[j]);
                         var firstNode = new Node()
                         {
                             InputTasks = firstList,
@@ -387,11 +387,9 @@ namespace AlphaMiner
         /// <param name="input">Узлы, содержащие одну задачу на входе</param>
         /// <param name="output">Узлы, содержащие одну задачу на выходе</param>
         /// <returns>Список всех конечных узлов без учета проверок и начальных/конечных узлов</returns>
-        List<Node> UniteNodes(List<Node> input, List<Node> output)
+        HashSet<Node> UniteNodes(HashSet<Node> input, HashSet<Node> output)
         {
-            var nodes = new List<Node>();
-            // СРОЧНО!!! Здесь необходимо сделать for вместо  foreach сложности n log (n), т.е.
-            // для каждого узла и вложенный от выбранного первого лога до конца
+            var nodes = new HashSet<Node>();
             foreach (var first in input)
             {
                 foreach (var second in output)
@@ -430,22 +428,22 @@ namespace AlphaMiner
         /// </summary>
         void GetInputOutputNodes()
         {
-            List<Node> inputNodes = new List<Node>()
+            HashSet<Node> inputNodes = new HashSet<Node>()
             { new Node()
             {
                 InputTasks = null,
                 OutputTasks = FirstTasks
             }
             };
-            List<Node> outputNodes = new List<Node>()
+            HashSet<Node> outputNodes = new HashSet<Node>()
             { new Node()
             {
                 OutputTasks = LastTasks,
                 InputTasks = null
             }
             };
-            CheckOutputOfNode(outputNodes[0], outputNodes);
-            CheckOutputOfNode(inputNodes[0], inputNodes);
+            CheckOutputOfNode(outputNodes.First(), outputNodes);
+            CheckOutputOfNode(inputNodes.First(), inputNodes);
             if (inputNodes.Count > 1)
             {
                 isSplitNeeded = true;
@@ -461,7 +459,7 @@ namespace AlphaMiner
                 });
             }
             else
-                Nodes.Add(inputNodes[0]);
+                Nodes.Add(inputNodes.First());
             if (outputNodes.Count > 1)
             {
                 isJoinNeeded = true;
@@ -479,9 +477,9 @@ namespace AlphaMiner
             }
             else
             {
-                outputNodes[0].InputTasks = outputNodes[0].OutputTasks;
-                outputNodes[0].OutputTasks = null;
-                Nodes.Add(outputNodes[0]);
+                outputNodes.First().InputTasks = outputNodes.First().OutputTasks;
+                outputNodes.First().OutputTasks = null;
+                Nodes.Add(outputNodes.First());
             }
             return;
         }
