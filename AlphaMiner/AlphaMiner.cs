@@ -130,7 +130,7 @@ namespace AlphaMiner
             
             if (IsInLog)
             {
-                Activity[] activities = EventLog.qryl_get_activities();
+                Activity[] activities = EventLog.QrylGetActivities();
                 foreach (var act in activities)
                 {
                     if (AllTasks.Contains(act.Name))
@@ -187,19 +187,20 @@ namespace AlphaMiner
                 Trace[] traces = EventLog.FindEventsForAllTraces();
                 foreach (var trace in traces)
                 {
-                    try
-                    {
+
                         List<string> act = new List<string>();
                         foreach (var activity in trace.traceEvents)
                         {
-                            act.Add(activity.activity.Name);
+                            act.Add(activity.Activity.Name);
                         }
                         GetRelationships(act.ToArray());
+                    try
+                    {
                     }
-                    catch
+                    catch (Exception e)
                     {
                         throw new WrongFormatOfTraceException($"Получен неверный формат трейса или обнаружена" +
-                            $" необъявленная задача! Номер трейса: {Array.IndexOf(traces, trace)}");
+                            $" необъявленная задача! Номер трейса: {Array.IndexOf(traces, trace)}" + e.Message);
                     }
                 }
             }
@@ -303,6 +304,8 @@ namespace AlphaMiner
         /// <param name="nodes">Список узлов, из которого взят проверяемый узел</param>
         void CheckOutputOfNode(Node node, List<Node> nodes)
         {
+            // СРОЧНО!!! Здесь необходимо сделать for вместо  foreach сложности n log (n), т.е.
+            // для каждой задачи и вложенный от выбранной первой задачи до конца
             foreach (var first in node.OutputTasks)
             {
                 foreach (var second in node.OutputTasks)
@@ -343,6 +346,8 @@ namespace AlphaMiner
         /// <param name="nodes">Список узлов, из которого взят проверяемый узел</param>
         void CheckInputOfNode(Node node, List<Node> nodes)
         {
+            // СРОЧНО!!! Здесь необходимо сделать for вместо  foreach сложности n log (n), т.е.
+            // для каждой задачи и вложенный от выбранной первой задачи до конца
             foreach (var first in node.InputTasks)
             {
                 foreach (var second in node.InputTasks)
@@ -385,6 +390,8 @@ namespace AlphaMiner
         List<Node> UniteNodes(List<Node> input, List<Node> output)
         {
             var nodes = new List<Node>();
+            // СРОЧНО!!! Здесь необходимо сделать for вместо  foreach сложности n log (n), т.е.
+            // для каждого узла и вложенный от выбранного первого лога до конца
             foreach (var first in input)
             {
                 foreach (var second in output)
