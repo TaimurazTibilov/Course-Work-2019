@@ -62,7 +62,7 @@ namespace AlphaMiner
         {
             string graph;
             VertexesOfTasks vertexes = new VertexesOfTasks(AllTasks);
-            graph = "digraph WFnet {\n";
+            graph = "digraph WFnet {\n\trankdir=\"LR\"";
             foreach (var node in Nodes)
             {
                 string v = Vertex;
@@ -101,8 +101,8 @@ namespace AlphaMiner
                 }
                 else
                 {
-                    PATH += @"/WFNet.DOT";
-                    path += @"/WFNet.png";
+                    PATH += @"\WFNet.DOT";
+                    path += @"\WFNet.png";
                 }
                 using (StreamWriter writer = new StreamWriter(new FileStream(PATH, FileMode.Create), Encoding.ASCII))
                 {

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.Win32;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -27,20 +28,24 @@ namespace AlphaExample
 
         private void LogPathFinder_Click(object sender, RoutedEventArgs e)
         {
-
+            OpenFileDialog openFile = new OpenFileDialog();
+            openFile.Filter = "SQ3 file (*.sq3)|*.sq3";
+            if (openFile.ShowDialog() == true)
+            {
+                LogPath.Text = openFile.FileName;
+            }
         }
 
         private void DirectoryPathFinder_Click(object sender, RoutedEventArgs e)
         {
-
+            var folderBrowser = new System.Windows.Forms.FolderBrowserDialog();
+            if (folderBrowser.ShowDialog() == System.Windows.Forms.DialogResult.OK)
+            {
+                DirectoryPath.Text = folderBrowser.SelectedPath;
+            }
         }
 
         private void GetGraph_Click(object sender, RoutedEventArgs e)
-        {
-
-        }
-
-        private void GraphName_TextChanged(object sender, TextChangedEventArgs e)
         {
 
         }
