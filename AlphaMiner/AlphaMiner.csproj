@@ -67,6 +67,7 @@
     <Compile Include="AdjacencyMatrix.cs" />
     <Compile Include="AlphaMiner.cs" />
     <Compile Include="DotWriter.cs" />
+    <Compile Include="GraphFileType.cs" />
     <Compile Include="Node.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="VertexesOfTasks.cs" />

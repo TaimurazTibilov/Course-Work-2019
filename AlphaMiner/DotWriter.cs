@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Diagnostics;
 
 namespace AlphaMiner
 {
@@ -85,24 +86,56 @@ namespace AlphaMiner
         /// Метод записи графа в указанный каталог и его сохранения в формате .DOT
         /// </summary>
         /// <param name="PATH">Ссылка на каталог для сохранения графа</param>
-        internal void WriteGraph(string PATH)
+        /// <param name="type">Тип файла, содержащего граф</param>
+        internal void WriteGraph(string path, GraphFileType type)
         {           
             try
             {
+                string PATH = path;
                 if (!Directory.Exists(PATH))
                     Directory.CreateDirectory(PATH);
                 if (PATH[PATH.Length - 1] == '/')
+                {
                     PATH += @"WFNet.DOT";
+                    path += @"WFNet.png";
+                }
                 else
+                {
                     PATH += @"/WFNet.DOT";
-                using (StreamWriter writer = new StreamWriter(new FileStream(PATH, FileMode.Create), Encoding.UTF8))
+                    path += @"/WFNet.png";
+                }
+                using (StreamWriter writer = new StreamWriter(new FileStream(PATH, FileMode.Create), Encoding.ASCII))
                 {
                     writer.WriteLine(CreateGraph());
                 }
+                if (type == GraphFileType.PNG)
+                    SaveAsPNG(path, PATH);
             }
             catch (Exception e)
             {
                 throw new WrongFormatOfPetriPathException(e.Message);
+            }
+
+        }
+
+        private void SaveAsPNG(string path, string PATH)
+        {
+            ProcessStartInfo processStart = new ProcessStartInfo();
+            processStart.CreateNoWindow = false;
+            processStart.UseShellExecute = false;
+            processStart.FileName = "graphviz/dot.exe";
+            processStart.WindowStyle = ProcessWindowStyle.Hidden;
+            processStart.Arguments = "-Tpng " + PATH + " -o " + path;
+            try
+            {
+                using (Process process = Process.Start(processStart))
+                {
+                    process.WaitForExit();
+                }
+            }
+            catch (Exception e)
+            {
+                throw e;
             }
         }
 

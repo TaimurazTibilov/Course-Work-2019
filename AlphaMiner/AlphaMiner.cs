@@ -14,12 +14,8 @@ namespace AlphaMiner
         /// Конструктор алгоритма, инициализирует ссылку на обрабатываемый лог и на
         /// каталог для сохранения графа в формате .DOT
         /// </summary>
-        /// <param name="pathOfLog">Ссылка на лог</param>
-        /// <param name="pathOfWrite">Ссылка на каталог для сохранения файла</param>
-        public Alpha(string pathOfLog, string pathOfWrite)
-        {
-            PathOfLog = pathOfLog;
-            PathOfWrite = pathOfWrite;            
+        public Alpha()
+        {          
         }
 
         /// <summary>
@@ -78,15 +74,20 @@ namespace AlphaMiner
         DotWriter Writer { get; set; }
 
         bool IsInLog = false;
-        
+
         /// <summary>
         /// Метод запуска алгоритма для обработки лога и записи полученной сети Петри
         /// </summary>
+        /// <param name="pathOfLog">Ссылка на лог</param>
+        /// <param name="pathOfWrite">Ссылка на каталог для сохранения файла</param>
+        /// <param name="type">Тип файла, содержащего граф</param>
         /// <exception cref="WrongFormatOfEventsException"></exception>
         /// <exception cref="WrongFormatOfTraceException"></exception>
         /// <exception cref="WrongFormatOfPetriPathException"></exception>
-        public void StartAlpha(bool isInLog)
+        public void StartAlpha(bool isInLog, string pathOfLog, string pathOfWrite, GraphFileType type)
         {
+            PathOfLog = pathOfLog;
+            PathOfWrite = pathOfWrite;
             FirstTasks = new List<string>();
             LastTasks = new List<string>();
             AllTasks = new List<string>();
@@ -117,7 +118,7 @@ namespace AlphaMiner
                 isSplitNeeded = this.isSplitNeeded,
                 isJoinNeeded = this.isJoinNeeded
             };
-            Writer.WriteGraph(PathOfWrite);
+            Writer.WriteGraph(PathOfWrite, type);
             return;
         }
 
