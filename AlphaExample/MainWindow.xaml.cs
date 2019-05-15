@@ -1,4 +1,5 @@
-﻿using Microsoft.Win32;
+﻿using AlphaMiner;
+using Microsoft.Win32;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -47,7 +48,15 @@ namespace AlphaExample
 
         private void GetGraph_Click(object sender, RoutedEventArgs e)
         {
-
+            try
+            {
+                Alpha alpha = new Alpha();
+                alpha.StartAlpha(true, LogPath.Text, DirectoryPath.Text, GraphFileType.PNG);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message, "Error!");
+            }
         }
     }
 }
