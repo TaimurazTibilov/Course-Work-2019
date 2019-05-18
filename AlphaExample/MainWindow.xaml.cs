@@ -2,6 +2,7 @@
 using Microsoft.Win32;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -51,7 +52,16 @@ namespace AlphaExample
             try
             {
                 Alpha alpha = new Alpha();
-                alpha.StartAlpha(true, LogPath.Text, DirectoryPath.Text, GraphFileType.PNG);
+                alpha.StartAlpha(true, GraphName.Text, LogPath.Text, DirectoryPath.Text, GraphFileType.PNG);
+                string image = DirectoryPath.Text + "\\" + GraphName.Text + ".png";
+                if (File.Exists(image))
+                {
+                    var source = new BitmapImage();
+                    source.BeginInit();
+                    source.UriSource = new Uri(image);
+                    source.EndInit();
+                    Result.Source = source;
+                }
             }
             catch (Exception ex)
             {

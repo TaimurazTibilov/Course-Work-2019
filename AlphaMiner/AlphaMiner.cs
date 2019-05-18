@@ -29,16 +29,6 @@ namespace AlphaMiner
         bool isSplitNeeded = false;
 
         /// <summary>
-        /// Ссылка на обрабатываемый лог
-        /// </summary>
-        public string PathOfLog { get; set; }
-
-        /// <summary>
-        /// Ссылка на каталог для записи графа
-        /// </summary>
-        public string PathOfWrite { get; set; }
-
-        /// <summary>
         /// Список задач, встречающихся в начале "следа"
         /// </summary>
         List<string> FirstTasks { get; set; }
@@ -78,26 +68,22 @@ namespace AlphaMiner
         /// <summary>
         /// Метод запуска алгоритма для обработки лога и записи полученной сети Петри
         /// </summary>
+        /// <param name="nameOfGraph">Имя файла сохраняемого графа</param>
         /// <param name="pathOfLog">Ссылка на лог</param>
         /// <param name="pathOfWrite">Ссылка на каталог для сохранения файла</param>
         /// <param name="type">Тип файла, содержащего граф</param>
         /// <exception cref="WrongFormatOfEventsException"></exception>
         /// <exception cref="WrongFormatOfTraceException"></exception>
         /// <exception cref="WrongFormatOfPetriPathException"></exception>
-        public void StartAlpha(bool isInLog, string pathOfLog, string pathOfWrite, GraphFileType type)
+        public void StartAlpha(bool isInLog, string nameOfGraph, string pathOfLog, string pathOfWrite, GraphFileType type)
         {
-            PathOfLog = pathOfLog;
-            PathOfWrite = pathOfWrite;
             FirstTasks = new List<string>();
             LastTasks = new List<string>();
             AllTasks = new List<string>();
             Nodes = new HashSet<Node>();
             int num;
             this.IsInLog = isInLog;
-            if (isInLog)
-            {
-                EventLog = new EvLog(PathOfLog);
-            }
+            EventLog = new EvLog(pathOfLog);
             GetTasks();
             AllTasks.Add("AND-split");
             AllTasks.Add("AND-join");
@@ -118,7 +104,7 @@ namespace AlphaMiner
                 isSplitNeeded = this.isSplitNeeded,
                 isJoinNeeded = this.isJoinNeeded
             };
-            Writer.WriteGraph(PathOfWrite, type);
+            Writer.WriteGraph(nameOfGraph, pathOfWrite, type);
             return;
         }
 
@@ -135,8 +121,8 @@ namespace AlphaMiner
                 foreach (var act in activities)
                 {
                     if (AllTasks.Contains(act.Name))
-                        throw new WrongFormatOfEventsException($"Некорректный набор встреающихся задач: " +
-                            $"задача {act.Name} встретилась дважды!");
+                        throw new WrongFormatOfEventsException($"Некорректный набор встречающихся задач: " +
+                            $"задача {act.Name} встретилась дважды или зарезервирована данной библиотекой!");
                     AllTasks.Add(act.Name);
                 }
                 return;
@@ -168,6 +154,11 @@ namespace AlphaMiner
                 return;
             for (int i = 0; i < trace.Length - 1; i++)
             {
+                if (trace[i] == trace[i + 1])
+                {
+                    Matrix[trace[i], trace[i + 1]] = "||";
+                    Matrix[trace[i + 1], trace[i]] = "||";
+                }
                 if (Matrix[trace[i + 1], trace[i]] == "#")
                     Matrix[trace[i], trace[i + 1]] = ">";
                 else
@@ -188,15 +179,14 @@ namespace AlphaMiner
                 Trace[] traces = EventLog.FindEventsForAllTraces();
                 foreach (var trace in traces)
                 {
-
+                    try
+                    {
                         List<string> act = new List<string>();
                         foreach (var activity in trace.traceEvents)
                         {
                             act.Add(activity.Activity.Name);
                         }
                         GetRelationships(act.ToArray());
-                    try
-                    {
                     }
                     catch (Exception e)
                     {

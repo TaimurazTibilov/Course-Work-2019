@@ -10,6 +10,7 @@
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"></RowDefinition>
             <RowDefinition></RowDefinition>
+            <RowDefinition></RowDefinition>
         </Grid.RowDefinitions>
         <Menu Height="20" Grid.Row="0">
 
@@ -33,7 +34,7 @@
                         <RowDefinition></RowDefinition>
                     </Grid.RowDefinitions>
                     <StackPanel Grid.Column="0" Grid.Row="0" Margin="5">
-                        <TextBlock Margin="2" Text="Select log"
+                        <TextBlock Margin="2" Text="Write log path"
                                    HorizontalAlignment="Center"
                                    VerticalAlignment="Top" FontSize="14"
                                    FontFamily="Century Gothic"></TextBlock>
@@ -50,12 +51,12 @@
                                     Click="LogPathFinder_Click"
                                     Grid.Column="1" FontFamily="Century Gothic" FontSize="14"
                                     Margin="2" Background="Bisque"
-                                    BorderBrush="Black" Content="Search...">
+                                    BorderBrush="Black" Content="Find...">
                             </Button>
                         </Grid>
                     </StackPanel>
                     <StackPanel Grid.Column="0" Grid.Row="1" Margin="5">
-                        <TextBlock Margin="2" Text="Select directory"
+                        <TextBlock Margin="2" Text="Select output directory"
                                    HorizontalAlignment="Center"
                                    VerticalAlignment="Top" FontSize="14"
                                    FontFamily="Century Gothic"></TextBlock>
@@ -72,7 +73,7 @@
                                     Click="DirectoryPathFinder_Click"
                                     Grid.Column="1" FontFamily="Century Gothic"
                                     Margin="2" Background="Bisque"
-                                    BorderBrush="Black" Content="Search..."
+                                    BorderBrush="Black" Content="Find..."
                                     FontSize="14">                                
                             </Button>
                         </Grid>
@@ -83,7 +84,7 @@
                                    VerticalAlignment="Top"
                                    HorizontalAlignment="Center"
                                    FontFamily="Century Gothic"
-                                   Text="Graph Name"></TextBlock>
+                                   Text="Output file Name"></TextBlock>
                         <TextBox x:Name="GraphName" Margin="2" Width="240"
                                  FontSize="14" FontFamily="Century Gothic"></TextBox>
                     </StackPanel>
@@ -99,5 +100,6 @@
                 </Grid>
             </StackPanel>
         </Grid>
+        <Image Grid.Row="2" VerticalAlignment="Center" HorizontalAlignment="Center" x:Name="Result"></Image>
     </Grid>
 </Window>

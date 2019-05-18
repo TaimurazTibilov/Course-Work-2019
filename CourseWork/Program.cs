@@ -12,8 +12,8 @@ namespace CourseWork
         static void Main(string[] args)
         {            
             Alpha alpha = new Alpha();
-            //alpha.StartAlpha(false);
-            alpha.StartAlpha(true, @"C:\Users\Таймураз\Downloads\log05.sq3", @"C:/Users/Таймураз/Desktop/output", GraphFileType.PNG);
+            alpha.StartAlpha(false, "WFnet", @"C:\Users\Таймураз\Downloads\log05.sq3", @"C:/Users/Таймураз/Desktop/output", GraphFileType.PNG);
+            //alpha.StartAlpha(true, "WFnet", @"C:\Users\Таймураз\Downloads\log05.sq3", @"C:/Users/Таймураз/Desktop/output", GraphFileType.PNG);
         }
     }
 }

@@ -87,7 +87,7 @@ namespace AlphaMiner
         /// </summary>
         /// <param name="PATH">Ссылка на каталог для сохранения графа</param>
         /// <param name="type">Тип файла, содержащего граф</param>
-        internal void WriteGraph(string path, GraphFileType type)
+        internal void WriteGraph(string fileName, string path, GraphFileType type)
         {           
             try
             {
@@ -96,13 +96,13 @@ namespace AlphaMiner
                     Directory.CreateDirectory(PATH);
                 if (PATH[PATH.Length - 1] == '/')
                 {
-                    PATH += @"WFNet.DOT";
-                    path += @"WFNet.png";
+                    PATH += $@"{fileName}.DOT";
+                    path += $@"{fileName}.png";
                 }
                 else
                 {
-                    PATH += @"\WFNet.DOT";
-                    path += @"\WFNet.png";
+                    PATH += $@"\{fileName}.DOT";
+                    path += $@"\{fileName}.png";
                 }
                 using (StreamWriter writer = new StreamWriter(new FileStream(PATH, FileMode.Create), Encoding.ASCII))
                 {
