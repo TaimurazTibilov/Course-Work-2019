@@ -8,7 +8,7 @@ using EventLogConnector;
 
 namespace AlphaMiner
 {
-    public class Alpha
+    public class Alpha : IAlpha
     {
         /// <summary>
         /// Конструктор алгоритма, инициализирует ссылку на обрабатываемый лог и на

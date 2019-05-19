@@ -108,7 +108,7 @@ namespace AlphaMiner
                 {
                     writer.WriteLine(CreateGraph());
                 }
-                if (type == GraphFileType.PNG)
+                if (type == GraphFileType.DOTAndPNG)
                     SaveAsPNG(path, PATH);
             }
             catch (Exception e)

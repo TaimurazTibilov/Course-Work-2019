@@ -6,9 +6,8 @@ using System.Threading.Tasks;
 
 namespace AlphaMiner
 {
-    public enum GraphFileType
+    interface IAlpha
     {
-        DOT = 1,
-        DOTAndPNG
+        void StartAlpha(bool isInLog, string nameOfGraph, string pathOfLog, string pathOfWrite, GraphFileType type);
     }
 }

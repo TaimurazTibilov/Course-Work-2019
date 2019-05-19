@@ -52,7 +52,7 @@ namespace AlphaExample
             try
             {
                 Alpha alpha = new Alpha();
-                alpha.StartAlpha(true, GraphName.Text, LogPath.Text, DirectoryPath.Text, GraphFileType.PNG);
+                alpha.StartAlpha(true, GraphName.Text, LogPath.Text, DirectoryPath.Text, GraphFileType.DOTAndPNG);
                 string image = DirectoryPath.Text + "\\" + GraphName.Text + ".png";
                 if (File.Exists(image))
                 {
