@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace AlphaMiner
 {
-    class WrongFormatOfPetriPathException : Exception
+    public class WrongFormatOfPetriPathException : Exception
     {
         public WrongFormatOfPetriPathException()
         {

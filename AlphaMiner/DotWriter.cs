@@ -85,8 +85,9 @@ namespace AlphaMiner
         /// <summary>
         /// Метод записи графа в указанный каталог и его сохранения в формате .DOT
         /// </summary>
-        /// <param name="PATH">Ссылка на каталог для сохранения графа</param>
+        /// <param name="path">Ссылка на каталог для сохранения графа</param>
         /// <param name="type">Тип файла, содержащего граф</param>
+        /// <param name="fileName">Имя сохраняемого файла</param>
         internal void WriteGraph(string fileName, string path, GraphFileType type)
         {           
             try
@@ -118,6 +119,11 @@ namespace AlphaMiner
 
         }
 
+        /// <summary>
+        /// Метод сохранения графа в формате .PNG
+        /// </summary>
+        /// <param name="path">Ссылка на граф в .DOT</param>
+        /// <param name="PATH">Ссылка на каталог для сохранения графа</param>
         private void SaveAsPNG(string path, string PATH)
         {
             ProcessStartInfo processStart = new ProcessStartInfo();

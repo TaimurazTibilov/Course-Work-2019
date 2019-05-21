@@ -33,7 +33,7 @@ namespace AlphaMiner
         internal string Vertex { get; set; }
 
         /// <summary>
-        /// Оператор сравнения на равенство узлов
+        /// Переопределение оператора сравнения на равенство узлов
         /// </summary>
         /// <param name="first">Сравниваемый узел</param>
         /// <param name="second">Сравниваемый узел</param>
@@ -57,7 +57,7 @@ namespace AlphaMiner
         }
 
         /// <summary>
-        /// Оператор сравнения на неравенство узлов
+        /// Переопределение оператора сравнения на неравенство узлов
         /// </summary>
         /// <param name="first">Сравниваемый узел</param>
         /// <param name="second">Сравниваемый узел</param>
@@ -68,7 +68,7 @@ namespace AlphaMiner
         }
 
         /// <summary>
-        /// Оператор сравнения на вхождение узлов
+        /// Переопределение оператора сравнения на вхождение узлов
         /// </summary>
         /// <param name="first">Сравниваемый узел</param>
         /// <param name="second">Сравниваемый узел</param>
@@ -79,7 +79,7 @@ namespace AlphaMiner
         }
 
         /// <summary>
-        /// Оператор сравнения на вхождение узлов
+        /// Переопределение оператора сравнения на вхождение узлов
         /// </summary>
         /// <param name="first">Сравниваемый узел</param>
         /// <param name="second">Сравниваемый узел</param>

@@ -75,6 +75,7 @@ namespace AlphaMiner
         /// <exception cref="WrongFormatOfEventsException"></exception>
         /// <exception cref="WrongFormatOfTraceException"></exception>
         /// <exception cref="WrongFormatOfPetriPathException"></exception>
+        /// <exception cref="Exception"></exception>
         public void StartAlpha(bool isInLog, string nameOfGraph, string pathOfLog, string pathOfWrite, GraphFileType type)
         {
             FirstTasks = new List<string>();
@@ -373,7 +374,7 @@ namespace AlphaMiner
         }
 
         /// <summary>
-        /// Объединяет списки узлов с разными наборами последних
+        /// Объединяет списки узлов с разными наборами узлов
         /// </summary>
         /// <param name="input">Узлы, содержащие одну задачу на входе</param>
         /// <param name="output">Узлы, содержащие одну задачу на выходе</param>

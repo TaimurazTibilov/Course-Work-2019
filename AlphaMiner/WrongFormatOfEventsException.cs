@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace AlphaMiner
 {
-    class WrongFormatOfEventsException : Exception
+    public class WrongFormatOfEventsException : Exception
     {
         public WrongFormatOfEventsException()
         {
