@@ -8,6 +8,6 @@ namespace AlphaMiner
 {
     interface IAlpha
     {
-        void StartAlpha(bool isInLog, string nameOfGraph, string pathOfLog, string pathOfWrite, GraphFileType type);
+        void StartAlpha(string nameOfGraph, string pathOfLog, string pathOfWrite, GraphFileType type);
     }
 }

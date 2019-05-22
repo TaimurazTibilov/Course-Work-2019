@@ -28,6 +28,9 @@ namespace AlphaExample
             InitializeComponent();
         }
 
+        /// <summary>
+        /// Метод обработки события нажатия кнопки для выбора пути к логу
+        /// </summary>
         private void LogPathFinder_Click(object sender, RoutedEventArgs e)
         {
             OpenFileDialog openFile = new OpenFileDialog();
@@ -38,6 +41,9 @@ namespace AlphaExample
             }
         }
 
+        /// <summary>
+        /// Метод обработки события нажатия кнопки для выбора каталога для сохранения
+        /// </summary>
         private void DirectoryPathFinder_Click(object sender, RoutedEventArgs e)
         {
             var folderBrowser = new System.Windows.Forms.FolderBrowserDialog();
@@ -47,12 +53,15 @@ namespace AlphaExample
             }
         }
 
+        /// <summary>
+        /// Пример использования библиотеки алгоритма по нажатию кнопки
+        /// </summary>
         private void GetGraph_Click(object sender, RoutedEventArgs e)
         {
             try
             {
                 Alpha alpha = new Alpha();
-                alpha.StartAlpha(true, GraphName.Text, LogPath.Text, DirectoryPath.Text, GraphFileType.DOTAndPNG);
+                alpha.StartAlpha(GraphName.Text, LogPath.Text, DirectoryPath.Text, GraphFileType.DOTAndPNG);
                 string image = DirectoryPath.Text + "\\" + GraphName.Text + ".png";
                 if (File.Exists(image))
                 {

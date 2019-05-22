@@ -63,8 +63,6 @@ namespace AlphaMiner
         /// </summary>
         DotWriter Writer { get; set; }
 
-        bool IsInLog = false;
-
         /// <summary>
         /// Метод запуска алгоритма для обработки лога и записи полученной сети Петри
         /// </summary>
@@ -76,29 +74,18 @@ namespace AlphaMiner
         /// <exception cref="WrongFormatOfTraceException"></exception>
         /// <exception cref="WrongFormatOfPetriPathException"></exception>
         /// <exception cref="Exception"></exception>
-        public void StartAlpha(bool isInLog, string nameOfGraph, string pathOfLog, string pathOfWrite, GraphFileType type)
+        public void StartAlpha(string nameOfGraph, string pathOfLog, string pathOfWrite, GraphFileType type)
         {
             FirstTasks = new List<string>();
             LastTasks = new List<string>();
             AllTasks = new List<string>();
             Nodes = new HashSet<Node>();
-            int num;
-            this.IsInLog = isInLog;
             EventLog = new EvLog(pathOfLog);
             GetTasks();
             AllTasks.Add("AND-split");
             AllTasks.Add("AND-join");
             Matrix = new AdjacencyMatrix(AllTasks);
-            if (!isInLog)
-            {
-                do
-                {
-                    Console.WriteLine("Write number of traces");
-                } while (!int.TryParse(Console.ReadLine(), out num) || num < 1);
-                GetData(num);
-            }
-            else
-                GetData(-1);
+            GetData();
             GetNodes();
             Writer = new DotWriter(AllTasks, new List<Node>(Nodes))
             {
@@ -115,24 +102,13 @@ namespace AlphaMiner
         /// <exception cref="WrongFormatOfEventsException"></exception>
         void GetTasks()
         {
-            
-            if (IsInLog)
+            Activity[] activities = EventLog.QrylGetActivities();
+            foreach (var act in activities)
             {
-                Activity[] activities = EventLog.QrylGetActivities();
-                foreach (var act in activities)
-                {
-                    if (AllTasks.Contains(act.Name))
-                        throw new WrongFormatOfEventsException($"Некорректный набор встречающихся задач: " +
-                            $"задача {act.Name} встретилась дважды или зарезервирована данной библиотекой!");
-                    AllTasks.Add(act.Name);
-                }
-                return;
-            }
-            
-            Console.WriteLine("Write down all types of tasks that used in log in format A, B, etc.");
-            foreach (var task in Console.ReadLine().Split(new char[] { ' ', ',', ';', '\'', '\"' }, StringSplitOptions.RemoveEmptyEntries))
-            {
-                AllTasks.Add(task);
+                if (AllTasks.Contains(act.Name))
+                    throw new WrongFormatOfEventsException($"Некорректный набор встречающихся задач: " +
+                        $"задача {act.Name} встретилась дважды или зарезервирована данной библиотекой!");
+                AllTasks.Add(act.Name);
             }
             return;
         }
@@ -173,36 +149,26 @@ namespace AlphaMiner
         /// <summary>
         /// Получает массив элементов Trace
         /// </summary>
-        void GetData(int num)
-        {            
-            if (num == -1)
+        void GetData()
+        {
+            Trace[] traces = EventLog.FindEventsForAllTraces();
+            foreach (var trace in traces)
             {
-                Trace[] traces = EventLog.FindEventsForAllTraces();
-                foreach (var trace in traces)
+                try
                 {
-                    try
+                    List<string> act = new List<string>();
+                    foreach (var activity in trace.traceEvents)
                     {
-                        List<string> act = new List<string>();
-                        foreach (var activity in trace.traceEvents)
-                        {
-                            act.Add(activity.Activity.Name);
-                        }
-                        GetRelationships(act.ToArray());
+                        act.Add(activity.Activity.Name);
                     }
-                    catch (Exception e)
-                    {
-                        throw new WrongFormatOfTraceException($"Получен неверный формат трейса или обнаружена" +
-                            $" необъявленная задача! Номер трейса: {Array.IndexOf(traces, trace)}" + e.Message);
-                    }
+                    GetRelationships(act.ToArray());
                 }
-            }
-            
-            Console.WriteLine("Write down all traces in format A B C, etc. : ");
-            for (int i = 0; i < num; i++)
-            {
-                GetRelationships(Console.ReadLine().Split(new char[] { ' ', ',', ';', '\'', '\"' },
-                    StringSplitOptions.RemoveEmptyEntries));
-            }
+                catch (Exception e)
+                {
+                    throw new WrongFormatOfTraceException($"Получен неверный формат трейса или обнаружена" +
+                        $" необъявленная задача! Номер трейса: {Array.IndexOf(traces, trace)}" + e.Message);
+                }
+            }            
         }
 
         /// <summary>
